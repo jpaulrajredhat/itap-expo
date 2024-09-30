@@ -1,0 +1,69 @@
+name = "rhde-microshift-ostree"
+description = "RHDE Microshift Image"
+version = "1.0.0"
+modules = []
+groups = []
+distro=""
+
+[[packages]]
+name = "microshift"
+version = "*"
+
+[[packages]]
+name = "openshift-clients"
+version = "*"
+
+[[packages]]
+name = "git"
+version = "*"
+
+[[packages]]
+name = "iputils"
+version = "*"
+
+[[packages]]
+name = "bind-utils"
+version = "*"
+
+[[packages]]
+name = "net-tools"
+version = "*"
+
+[[packages]]
+name = "iotop"
+version = "*"
+
+[[packages]]
+name = "redhat-release"
+version = "*"
+
+[[packages]]
+name = "microshift-networking"
+version = "*"
+
+[[packages]]
+name = "microshift-release-info"
+version = "*"
+
+[[packages]]
+name = "microshift-selinux"
+version = "*"
+
+[customizations]
+hostname = "ztp-microshift"
+
+[customizations.firewall]
+ports = ["6443:tcp"]
+
+[customizations.firewall.services]
+enabled = ["http", "https", "ntp", "dhcp", "ssh"]
+disabled = ["telnet"]
+[customizations.services]
+enabled = ["microshift"]
+
+[[customizations.user]]
+name = "<USER_NAME>>"
+password = "<Encrypted Password>"
+key = "<SSH Public key here>"
+groups = ["wheel"]
+description = "microshift user"

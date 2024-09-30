@@ -1,0 +1,8 @@
+FROM registry.access.redhat.com/ubi9/ubi
+RUN yum -y install nginx && yum clean all
+COPY repo /usr/share/nginx/html/
+COPY nginx /etc/nginx.conf
+EXPOSE 8080
+CMD ["/usr/sbin/nginx", "-c", "/etc/nginx.conf"]
+ARG commit
+ADD ${commit} /usr/share/nginx/html/

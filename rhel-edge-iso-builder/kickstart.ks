@@ -1,0 +1,32 @@
+lang en_IN
+keyboard --xlayouts='us'
+timezone Asia/Kolkata --utc
+rootpw $2b$10$cC8FXwx8oeWydWgiMwHFVeH4rdO38piWmNAD1AMoX6WMHhqJSX/DG --iscrypted
+zerombr
+clearpart --all --initlabel
+part /boot/efi --fstype=efi --size=200
+part /boot --fstype=xfs --asprimary --size=800
+part pv.01 --grow
+volgroup rhel pv.01
+logvol / --vgname=rhel --fstype=xfs --size=10000 --name=root
+reboot
+text
+network --bootproto=dhcp
+ostreesetup --nogpg --url=http://192.168.1.202:8080/repo --osname=rhel --remote=edge --ref=rhel/9/x86_64/edge
+
+%post 
+# Add the pull secret to CRI-O and set root user-only read/write permissions
+cat > /etc/crio/openshift-pull-secret << EOF
+{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfMGJlMjQ5ZDMyZWE2NGFiYjhkYmM2OTc1NmNiZWFmMDg6UTFOVU5ZRlYyUTZZWVAyN0lYNjBIT1hZNkxNVE1ZVFFVS1dRTU9PTlg5Q1A2SUlGR01ENDQ1N1o3UkJRNzIxRQ==","email":"mukesh@zagaopensource.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfMGJlMjQ5ZDMyZWE2NGFiYjhkYmM2OTc1NmNiZWFmMDg6UTFOVU5ZRlYyUTZZWVAyN0lYNjBIT1hZNkxNVE1ZVFFVS1dRTU9PTlg5Q1A2SUlGR01ENDQ1N1o3UkJRNzIxRQ==","email":"mukesh@zagaopensource.com"},"registry.connect.redhat.com":{"auth":"fHVoYy1wb29sLWUxZDMyMmE4LWZiODAtNDM1Zi04ZTk2LTVmMDQ4ZGUyYzczMzpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSXpOVGRoWWpsaFlqaGpObU0wTnpZeVlUQmpaVE0zWTJZMU0yRmxNV0ZqT1NKOS5QVFlNNFdBbmhhX0liY1FtcGpqZDRVTzNlNDljTVExM0I1WW1IQUotajJOZXh1R1JUbU5MR0k0QnhtQWdITWtLd19EMUF1UHlrZllrR0pnVGp2QWt2RU5pUUgxVzdVN04yQldOTEVVd3BieHNVVUdkRU5IaHczZW9hRjdMTDljRWVJZDc2S3NvVjNWLVlzSkRGOG9oRUxSSGllMllfQVp5MjBjalFPbFhQdF8ybFMtRldrZWZvdjFLa0ZUVTZQZ0VxemNNdEdMcE9sVmxNbHUzeV92RXZaeFdwQmNNYlJ3SFY3eFpxWlFTX3FWdDdkM0NOQW9UUEJpNUZlOGczVGlSeGMwaVp0V1BpaG1ieFBJbWlhRFR1LXJUZUdtbVpGRmFIMXFldFBqbDFXNnJEVmtmUTZIbnJTREhKQjZBVkhhbDlFMUo2ZWZZMmt2OTlUTVdqZjB3UnRzd0oyblRUa1Yyc3RVMG1Pa1ppYXJKa3lsM2NkWlphLW1ZUG5XVEd0UUJkaGZyQS1QU2NoUGJWdEZNa0xEUHVlS1MxVzVNMEVTanVFOU45X1VxTFlfSTFDbjB4VGlOUkE0czdDLW9yOHAxOGFlWHFhM05ucU1tR1dMSjZOQ0tfa2thZTFQU0FXYUpsc19QVzloeS1RZEZ3Yzh0NWVielNvSk85dEMtZVNFS3M2WGFYdmtYaGtpcUdMcV9Vd0tJdVRRbURZOFQxTmE0NUtzdnM4S1dOQVM0UnBvTGRxSmlnUERuZms4Wi1YTDFBV2F0d1RqZVBma2NCOEtYZEFBVmFjOC0wejRnU3BtaTB1aHFQMWJKdjVUYTNHMmRaRXpjVUtrOXh6YTV3eHFubTZIZE4yZ2R4d2pWT0N4VFM3SEdmNTFNcjZtVU5ETGNsT21iY0I4ZHl6WQ==","email":"mukesh@zagaopensource.com"},"registry.redhat.io":{"auth":"fHVoYy1wb29sLWUxZDMyMmE4LWZiODAtNDM1Zi04ZTk2LTVmMDQ4ZGUyYzczMzpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSXpOVGRoWWpsaFlqaGpObU0wTnpZeVlUQmpaVE0zWTJZMU0yRmxNV0ZqT1NKOS5QVFlNNFdBbmhhX0liY1FtcGpqZDRVTzNlNDljTVExM0I1WW1IQUotajJOZXh1R1JUbU5MR0k0QnhtQWdITWtLd19EMUF1UHlrZllrR0pnVGp2QWt2RU5pUUgxVzdVN04yQldOTEVVd3BieHNVVUdkRU5IaHczZW9hRjdMTDljRWVJZDc2S3NvVjNWLVlzSkRGOG9oRUxSSGllMllfQVp5MjBjalFPbFhQdF8ybFMtRldrZWZvdjFLa0ZUVTZQZ0VxemNNdEdMcE9sVmxNbHUzeV92RXZaeFdwQmNNYlJ3SFY3eFpxWlFTX3FWdDdkM0NOQW9UUEJpNUZlOGczVGlSeGMwaVp0V1BpaG1ieFBJbWlhRFR1LXJUZUdtbVpGRmFIMXFldFBqbDFXNnJEVmtmUTZIbnJTREhKQjZBVkhhbDlFMUo2ZWZZMmt2OTlUTVdqZjB3UnRzd0oyblRUa1Yyc3RVMG1Pa1ppYXJKa3lsM2NkWlphLW1ZUG5XVEd0UUJkaGZyQS1QU2NoUGJWdEZNa0xEUHVlS1MxVzVNMEVTanVFOU45X1VxTFlfSTFDbjB4VGlOUkE0czdDLW9yOHAxOGFlWHFhM05ucU1tR1dMSjZOQ0tfa2thZTFQU0FXYUpsc19QVzloeS1RZEZ3Yzh0NWVielNvSk85dEMtZVNFS3M2WGFYdmtYaGtpcUdMcV9Vd0tJdVRRbURZOFQxTmE0NUtzdnM4S1dOQVM0UnBvTGRxSmlnUERuZms4Wi1YTDFBV2F0d1RqZVBma2NCOEtYZEFBVmFjOC0wejRnU3BtaTB1aHFQMWJKdjVUYTNHMmRaRXpjVUtrOXh6YTV3eHFubTZIZE4yZ2R4d2pWT0N4VFM3SEdmNTFNcjZtVU5ETGNsT21iY0I4ZHl6WQ==","email":"mukesh@zagaopensource.com"}}}
+EOF
+chmod 600 /etc/crio/openshift-pull-secret
+%end
+%post
+# Configure the firewall with the mandatory rules for MicroShift
+firewall-offline-cmd --zone=trusted --add-source=10.42.0.0/16
+firewall-offline-cmd --zone=trusted --add-source=169.254.169.1
+mkdir -p /home/zaga/.kube/
+cat /var/lib/microshift/resources/kubeadmin/kubeconfig > /home/zaga/.kube/config
+chmod go-r /home/zaga/.kube/config
+chown zaga:zaga ~/.kube/config
+%end
