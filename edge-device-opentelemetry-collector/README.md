@@ -38,3 +38,7 @@ oc apply -f collector-configmap-otelconfig.yaml -n itap-expo
 ```shell
 oc apply -f collector-deployment.yaml -n itap-expo
 ```
+
+
+
+In [collector-configmap-otelconfig.yaml](./collector-configmap-otelconfig.yaml) change the **"<REMOTE_OTEL_COLLECTOR>"** on otlp exporter

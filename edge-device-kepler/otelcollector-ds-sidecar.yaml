@@ -1,0 +1,25 @@
+---
+spec:
+  template:
+    spec:
+      volumes:
+      - configMap:
+          name: otelcol
+        name: otelconfig
+      containers:
+      - name: otc-container
+        imagePullPolicy: IfNotPresent
+        args:
+          - "--config=/conf/config/otelconfig.yaml"
+        image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.110.0
+        resources:
+          limits:
+            cpu: 200m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - mountPath: /conf/config
+          name: otelconfig
+
