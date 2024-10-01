@@ -561,3 +561,42 @@ Installed:
   runc-4:1.1.14-1.rhaos4.16.el9.x86_64                                                           
 
 Complete! -->
+
+
+
+
+
+
+
+
+
+<!-- 
+
+Default config yaml for microshift after install
+
+sudo microshift show-config
+apiServer:
+  advertiseAddress: 10.44.0.0
+  subjectAltNames:
+  - rhel9-rpi5-1.systems
+debugging:
+  logLevel: Normal
+dns:
+  baseDomain: example.com
+etcd:
+  memoryLimitMB: 0
+manifests:
+  kustomizePaths:
+  - /usr/lib/microshift/manifests
+  - /usr/lib/microshift/manifests.d/*
+  - /etc/microshift/manifests
+  - /etc/microshift/manifests.d/*
+network:
+  clusterNetwork:
+  - 10.42.0.0/16
+  serviceNetwork:
+  - 10.43.0.0/16
+  serviceNodePortRange: 30000-32767
+node:
+  hostnameOverride: rhel9-rpi5-1.systems
+  nodeIP: 192.168.31.215 -->

@@ -37,6 +37,11 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: metadata.name
+            - name: K8S_NODE_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
             - name: K8S_NODE_NAME
               valueFrom:
                 fieldRef:
