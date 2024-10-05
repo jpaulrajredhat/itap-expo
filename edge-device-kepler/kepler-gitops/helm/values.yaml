@@ -1,0 +1,216 @@
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: sustainable_computing_io
+  name: kepler
+  pullPolicy: IfNotPresent
+  tag: latest
+
+namespace:
+  name: "kepler"
+  annotations:
+    openshift.io/description: Kepler exporter
+    openshift.io/display-name: ""
+    openshift.io/sa.scc.mcs: s0:c11,c10
+    openshift.io/sa.scc.supplemental-groups: 1000130000/10000
+    openshift.io/sa.scc.uid-range: 1000130000/10000
+  labels:
+    kubernetes.io/metadata.name: kepler
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/audit-version: v1.24
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/warn: privileged
+    pod-security.kubernetes.io/warn-version: v1.24
+    security.openshift.io/scc.podSecurityLabelSync: "false"
+    sustainable-computing.io/app: kepler
+
+rbac:
+  enabled: true
+
+  serviceAccount:
+    create: true
+    name: ""
+    annotations: {}
+
+  role:
+    create: true
+    name: ""
+    annotations: {}
+
+  clusterRole:
+    create: true
+    name: ""
+    annotations: {}
+    rules:
+      - apiGroups: [""]
+        resources: 
+          - nodes/metrics
+          - nodes/proxy
+          - nodes/stats
+          - pods
+        verbs: 
+          - get
+          - watch
+          - list
+
+  roleBinding:
+    create: true
+    name: ""
+    annotations: {}
+
+  clusterRoleBinding:
+    create: true
+    name: ""
+    annotations: {}
+
+  scc:
+    create: true
+    name: ""
+    annotations:
+      kubernetes.io/description: 'privileged allows access to kepler'
+
+imageUpdateStrategy: ""
+
+hostPID: "true"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+containerSecurityContext:
+  privileged: true
+
+DownwardApiEnv:
+  - name: NODE_IP
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: status.hostIP
+  - name: NODE_NAME
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: spec.nodeName
+
+env: {}
+
+secretsEnv: {}
+
+configmapEnv:
+  - name: "kepler-cm"
+    mount: true
+    mountPath: /etc/kepler/kepler.config
+    filePath: false
+    data:
+      CGROUP_METRICS: '*'
+      ENABLE_EBPF_CGROUPID: 'true'
+      ENABLE_QAT: 'false'
+      EXPOSE_HW_COUNTER_METRICS: 'true'
+      KEPLER_LOG_LEVEL: '1'
+      EXPOSE_IRQ_COUNTER_METRICS: 'true'
+      ENABLE_GPU: 'true'
+      BIND_ADDRESS: '0.0.0.0:9102'
+      METRIC_PATH: /metrics
+      REDFISH_SKIP_SSL_VERIFY: 'true'
+      EXPOSE_KUBELET_METRICS: 'true'
+      ENABLE_PROCESS_METRICS: 'false'
+      MODEL_CONFIG: CONTAINER_COMPONENTS_ESTIMATOR=false
+      REDFISH_PROBE_INTERVAL_IN_SECONDS: '60'
+      EXPOSE_CGROUP_METRICS: 'true'
+      CPU_ARCH_OVERRIDE: ''
+      KEPLER_NAMESPACE: kepler
+
+volumes:
+  - type: HostPath
+    volumeName: "lib-modules"
+    mountPath: /lib/modules
+    hostPathType: Directory
+  - type: HostPath
+    volumeName: "tracing"
+    mountPath: /sys
+    hostPathType: Directory
+  - type: HostPath
+    volumeName: "proc"
+    mountPath: /proc
+    hostPathType: Directory
+  - type: HostPath
+    volumeName: "kernel-src"
+    mountPath: /usr/src/kernels
+    hostPathType: Directory
+  - type: HostPath
+    volumeName: "kernel-debug"
+    mountPath: /sys/kernel/debug
+    hostPathType: Directory
+
+resources: {}
+  # limits:
+  #   cpu: 600m
+  #   memory: 1128Mi
+  # requests:
+  #   cpu: 600m
+  #   memory: 1128Mi
+
+nodeSelector:
+  kubernetes.io/os: linux
+
+tolerations: []
+
+affinity: {}
+
+args: {}
+
+command: 
+    - /usr/bin/kepler
+    - '-address'
+    - '0.0.0.0:9102'
+    - '-enable-cgroup-id=true'
+    - '-enable-gpu=$(ENABLE_GPU)'
+    - '-v=$(KEPLER_LOG_LEVEL)'
+
+ports:
+  - name: prom-http
+    port: 9102
+    protocol: TCP
+    targetPort: 9102
+
+service:
+  - enabled: true
+    serviceType: ClusterIP
+    name: kepler
+  - enabled: true
+    serviceType: LoadBalancer
+    name: kepler-lb
+
+routes:
+  enabled: false
+  tls: false
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  tls: false
+  annotations: {}
+
+probes:
+  readiness: {}
+  liveness:
+    httpGet:
+      path: /healthz
+      port: 9102
+      scheme: HTTP
+    initialDelaySeconds: 10
+    timeoutSeconds: 10
+    periodSeconds: 60
+    successThreshold: 1
+    failureThreshold: 5
+  startup: {}

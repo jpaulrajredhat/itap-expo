@@ -1,0 +1,26 @@
+{{- if .Values.namespace.name }}
+
+{{- if and .Values.rbac.enabled .Values.rbac.roleBinding.create -}}
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ default (printf "%s-rolebinding" .Release.Name) .Values.rbac.roleBinding.name }}
+  namespace: {{ $.Values.namespace.name }}
+  labels:
+    {{- include "kepler.labels" . | nindent 4 }}
+  {{- with .Values.rbac.roleBinding.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Release.Name }}-role
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-serviceaccount
+
+{{- end }}
+
+{{- end }}

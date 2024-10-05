@@ -1,15 +1,16 @@
-
-
 # Building Red Hat Device Edge with microshift ISO using composer-cli
 
-Prerequistes ( Used for this demo ) 
+Prerequistes ( Used for this demo )
+
 - Red Hat enterprise linux 9 ( In bare metal or Virtual Machine )
 - Red Hat subscription to enable rhocp and fast-datapath
 
 **Note**: *If below commands doesnt work even for sudo user, try adding the user to weldr group*
+
 ```shell
 sudo usermod -aG weldr <youruser>
 ```
+
 *If still cant able to run even after adding the user to weldr group, then run the commands as ***root user***.*
 
 1. Install necessary tools to build ISO file with composer-cli
@@ -23,6 +24,7 @@ sudo dnf install osbuild-composer composer-cli cockpit-composer bash-completion 
 ```shell
 sudo firewall-cmd --add-service=cockpit && firewall-cmd --add-service=cockpit --permanent
 ```
+
 ```shell
 sudo systemctl enable cockpit.socket --now
 ```
@@ -32,6 +34,7 @@ sudo systemctl enable cockpit.socket --now
 ```shell
 sudo systemctl enable osbuild-composer.socket --now
 ```
+
 ```shell
 source /etc/bash_completion.d/composer-cli
 ```
@@ -84,12 +87,14 @@ system = false
 EOF
 ```
 
-10. Using composer-cli tool add the blueprint file 
+10. Using composer-cli tool add the blueprint file
 
 ```shell
 sudo composer-cli sources add /var/repos/microshift-local/microshift-local-repo.toml
 ```
+
 11. To verify packages added in microshift-local
+
 ```shell
 sudo composer-cli sources info microshift-local
 ```
@@ -97,7 +102,7 @@ sudo composer-cli sources info microshift-local
 <!-- # PASSWORD="admin123"
 # python3 -c 'import crypt, os; pw = os.getenv("PASSWORD"); print(crypt.crypt(pw))' -->
 
-12. Create another toml file with all necessary packages and other customizations to be included in iso file, here microshift is included. This creates a ostree blueprint.   
+12. Create another toml file with all necessary packages and other customizations to be included in iso file, here microshift is included. This creates a ostree blueprint.
 (Refer [RHDE-microshift-ostree](./rhde-microshift-ostree.toml))
 
 ```shell
@@ -175,6 +180,7 @@ description = "microshift user"
 
 EOF
 ```
+
 **Note**: *To Generate password for password = "<PASSWORD_HERE>" use the below command. This will prompt to enter password and provides encrypted password as output*
 
 ```shell
@@ -214,6 +220,7 @@ tar -xvf <OSTREE_IMAGE_ID>-commit.tar
 18. Now, create an docker image and run the container that hosts the custom packages extracted from ***"<OSTREE_IMAGE_ID>-commit.tar"***
 
 Refer [nginx-conf](./nginx-conf)
+
 ```shell
 cat > nginx << EOF
 events {
@@ -233,6 +240,7 @@ EOF
 ```
 
 Refer []()
+
 ```shell
 cat > nginx-dockerfile << EOF
 FROM registry.access.redhat.com/ubi9/ubi
@@ -282,7 +290,7 @@ composer-cli compose start-ostree --ref rhel/9/x86_64/edge --url http://127.0.0.
 composer-cli compose status
 ```
 
-22. Compose the image for microshift-rpmostree-installer. This 
+22. Compose the image for microshift-rpmostree-installer. This
 
 ```shell
 composer-cli compose image <INSTALLER_IMAGE_ID>
@@ -332,53 +340,8 @@ EOF
 mkksiso kickstart.ks <INSTALLER_IMAGE_ID>-installer.iso microshift-rpmostree-installer.iso
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!-- 
 !!!!!!! Tested installing packages in local !!!!!!!
-
 
 sudo dnf install microshift* -y
 Updating Subscription Management repositories.
@@ -561,14 +524,6 @@ Installed:
   runc-4:1.1.14-1.rhaos4.16.el9.x86_64                                                           
 
 Complete! -->
-
-
-
-
-
-
-
-
 
 <!-- 
 

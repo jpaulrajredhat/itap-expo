@@ -1,0 +1,240 @@
+{{- if .Values.namespace.name }}
+
+apiVersion: apps/v1
+kind: DaemonSet
+
+metadata:
+
+  name: {{ include "kepler.fullname" . }}
+  namespace: {{ $.Values.namespace.name }}
+  labels:
+    {{- include "kepler.labels" . | nindent 4 }}
+
+
+spec:
+
+  selector:
+    matchLabels:
+      {{- include "kepler.selectorLabels" . | nindent 6 }}
+
+
+  updateStrategy:
+    type: {{ default "RollingUpdate" .Values.imageUpdateStrategy }}
+
+
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "kepler.selectorLabels" . | nindent 8 }}
+
+
+    spec:
+
+      nodeSelector:
+      {{- if .Values.nodeSelector }}
+         {{ toYaml .Values.nodeSelector | nindent 12 }}
+      {{- end }}
+
+
+      {{- if .Values.rbac.serviceAccount.create }} # Check if 'serviceAccount.create' is true
+      serviceAccountName: {{ .Values.rbac.serviceAccount.name | default (printf "%s-serviceaccount" .Release.Name) }} # Generate or use provided name
+      {{- end }}
+
+      {{- if .Values.rbac.serviceAccount.create }} # Check if 'serviceAccount.create' is true
+      serviceAccount: {{ .Values.rbac.serviceAccount.name | default (printf "%s-serviceaccount" .Release.Name) }} # Generate or use provided name
+      {{- end }}
+
+      {{- if .Values.hostPID }}
+      hostPID: {{ .Values.hostPID }}
+      {{- end }}
+
+      volumes:
+
+        {{- range .Values.secretsEnv }}
+        {{- if .mount }}
+        - name: {{ if .name }}{{ .name }}{{ else }}{{ include "kepler.fullname" $ }}-secret{{ end }}
+          secret:
+            secretName: {{ if .name }}{{ .name }}{{ else }}{{ include "kepler.fullname" $ }}-secret{{ end }}
+            {{- if .filePath }}
+            items:
+              {{- range $item := .data }}
+              - key: {{ $item.name }}
+                path: {{ $item.name }}
+              {{- end }}
+            {{- else }}
+            items:
+              {{- range $key, $value := .data }}
+              - key: {{ $key }}
+                path: {{ $key }}
+              {{- end }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+
+
+        {{- range .Values.configmapEnv }}
+        {{- if .mount }}
+        - name: {{ if .name }}{{ .name }}{{ else }}{{ include "kepler.fullname" $ }}-configmap{{ end }}
+          configMap:
+            name: {{ if .name }}{{ .name }}{{ else }}{{ include "kepler.fullname" $ }}-configmap{{ end }}
+        {{- end }}
+        {{- end }}
+
+        {{- range .Values.volumes }}
+        {{- if eq .type "EmptyDir" }}
+        - name: {{ if .volumeName }}{{ .volumeName }}{{ else }}{{ include "kepler.fullname" $ }}-emptydir{{ end }}
+          emptyDir: {}
+        {{- else if eq .type "HostPath" }}
+        - name: {{ if .volumeName }}{{ .volumeName }}{{ else }}{{ include "kepler.fullname" $ }}-hostpath{{ end }}
+          hostPath:
+            path: {{ .mountPath }}
+            {{- if .hostPathType }}
+            type: {{ .hostPathType }}
+            {{- end }}
+        {{- end }}
+        {{- end }}
+
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+
+      containers:
+
+
+        - name: {{ .Values.containerName | default .Chart.Name }}
+
+
+          image: {{ .Values.image.registry }}/{{ .Values.image.username }}/{{ .Values.image.name }}:{{ .Values.image.tag | default "latest" }}
+
+
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.args }} # Check if 'args' is present in values.yaml
+
+
+          args:
+            {{- toYaml .Values.args | nindent 12 }}
+          {{- end }}
+
+
+          securityContext:
+            {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+
+
+          ports:
+            {{- range $index, $port := .Values.ports }}
+            - name: {{ $port.name | default (printf "port-%d" $index) }}
+              containerPort: {{ $port.port }}
+              protocol: {{ $port.protocol | default "TCP" }}
+            {{- end }}
+
+        # Probes section
+          {{- with .Values.probes }}
+
+          # Readiness Probe
+          {{- if .readiness }}
+          readinessProbe:
+            {{- toYaml .readiness | nindent 12 }}
+          {{- end }}
+
+          # Liveness Probe
+          {{- if .liveness }}
+          livenessProbe:
+            {{- toYaml .liveness | nindent 12 }}
+          {{- end }}
+
+          # Startup Probe
+          {{- if .startup }}
+          startupProbe:
+            {{- toYaml .startup | nindent 12 }}
+          {{- end }}
+
+          {{- end }}
+
+
+          env:
+
+          {{- if .Values.DownwardApiEnv }}
+              {{ toYaml .Values.DownwardApiEnv | nindent 12 }}
+          {{- end }}
+
+          {{- if .Values.env }}
+              {{ toYaml .Values.env | nindent 12 }}
+          {{- end }}
+
+         {{- range .Values.secretsEnv }}
+          {{- $config := . }}
+          {{- if not $config.filePath }}
+            # Handle key-value data only
+            {{- range $key, $value := $config.data }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ if $config.name }}{{ $config.name }}{{ else }}{{ include "kepler.fullname" $ }}-secret{{ end }}
+                  key: {{ $key }}
+            {{- end }}
+          {{- end }}
+         {{- end }}
+         {{- range .Values.configmapEnv }}
+          {{- $config := . }}
+          {{- if not $config.filePath }}
+            # Handle key-value data only
+            {{- range $key, $value := $config.data }}
+            - name: {{ $key }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ if $config.name }}{{ $config.name }}{{ else }}{{ include "kepler.fullname" $ }}-configmap{{ end }}
+                  key: {{ $key }}
+            {{- end }}
+          {{- end }}
+         {{- end }}
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+          volumeMounts:
+            {{- range .Values.secretsEnv }}
+            {{- if .mount }}
+            - name: {{ if .name }}{{ .name }}{{ else }}{{ include "kepler.fullname" $ }}-secret{{ end }}
+              mountPath: {{ .mountPath | default "/" }}
+            {{- end }}
+            {{- end }}
+            {{- range .Values.configmapEnv }}
+            {{- if .mount }}
+            - name: {{ if .name }}{{ .name }}{{ else }}{{ include "kepler.fullname" $ }}-configmap{{ end }}
+              mountPath: {{ .mountPath | default "/" }}
+            {{- end }}
+            {{- end }}
+            {{- range .Values.volumes }}
+            {{- if eq .type "EmptyDir" }}
+            - name: {{ if .volumeName }}{{ .volumeName }}{{ else }}{{ include "kepler.fullname" $ }}-emptydir{{ end }}
+              mountPath: {{ .mountPath }}
+            {{- else if eq .type "HostPath" }}
+            - name: {{ if .volumeName }}{{ .volumeName }}{{ else }}{{ include "kepler.fullname" $ }}-hostpath{{ end }}
+              mountPath: {{ .mountPath }}
+            {{- end }}
+            {{- end }}
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+{{- end }}

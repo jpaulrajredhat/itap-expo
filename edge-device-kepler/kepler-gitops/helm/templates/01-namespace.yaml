@@ -1,0 +1,22 @@
+{{- include "validateNamespaceName" . }}
+
+{{- if .Values.namespace.name }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace.name }}
+
+  {{- with .Values.namespace.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.namespace.labels }}
+  labels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+spec:
+  finalizers:
+    - kubernetes
+{{- end }}

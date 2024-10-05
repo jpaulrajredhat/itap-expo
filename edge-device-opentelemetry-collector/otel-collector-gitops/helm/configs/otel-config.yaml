@@ -1,0 +1,216 @@
+  receivers:
+
+    prometheus/kepler-powerlevel:
+      config:
+        scrape_configs:
+          - job_name: 'kepler'
+            scrape_interval: 2s
+            static_configs:
+              - targets: 
+                  - ${env:K8S_NODE_IP}:9102
+                labels: 
+                  exported_instance: ${env:K8S_NODE_NAME}
+
+    kubeletstats/node:
+      auth_type: serviceAccount
+      collection_interval: 5s
+      endpoint: https://${env:K8S_NODE_IP}:10250
+      initial_delay: 1s
+      insecure_skip_verify: true
+      metric_groups:
+        - node
+      metrics:
+        k8s.node.cpu.usage:
+          enabled: true
+        k8s.node.cpu.utilization:
+          enabled: false
+
+    kubeletstats/pod:
+      auth_type: serviceAccount
+      collection_interval: 5s
+      endpoint: https://${env:K8S_NODE_IP}:10250
+      initial_delay: 1s
+      insecure_skip_verify: true
+      metric_groups:
+        - pod
+      metrics:
+        k8s.pod.cpu.usage:
+          enabled: true
+        k8s.pod.cpu.utilization:
+          enabled: false
+
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+
+  processors:
+    batch: null
+
+    filter/pod-powerlevel:
+      metrics:
+        include:
+          match_type: strict
+          metric_names:
+            - kepler_container_joules_total
+            - kepler_container_other_joules_total
+            - kepler_container_platform_joules_total
+            - kepler_container_package_joules_total
+            - kepler_container_core_joules_total
+            - kepler_container_dram_joules_total
+            - kepler_container_gpu_joules_total
+            - kepler_node_info
+
+    filter/node-powerlevel:
+      metrics:
+        include:
+          match_type: strict
+          metric_names:
+            - kepler_node_core_joules_total
+            - kepler_node_other_joules_total
+            - kepler_node_package_joules_total
+            - kepler_node_platform_joules_total
+            - kepler_node_uncore_joules_total
+            - kepler_node_dram_joules_total
+            - kepler_node_gpu_joules_total
+            - kepler_node_info
+
+    resource/nodename-insert:
+      attributes:
+        - action: insert
+          key: k8s.node.name
+          value: ${K8S_NODE_NAME}
+
+    resource/nodestats:
+      attributes:
+        - action: insert
+          key: metrics.stats
+          value: node
+
+    resource/podstats:
+      attributes:
+        - action: insert
+          key: metrics.stats
+          value: pod
+
+    resource/pod-powerlevel-stats:
+      attributes:
+        - action: insert
+          key: metrics.stats
+          value: pod-powerlevel
+
+    resource/node-powerlevel-stats:
+      attributes:
+        - action: insert
+          key: metrics.stats
+          value: node-powerlevel
+
+    resource/clusterinfo:
+      attributes:
+        - action: insert
+          key: k8s.cluster.type
+          value: edge-microshift
+        - action: insert
+          key: k8s.cluster.name
+          value: ${K8S_NODE_NAME}
+
+    resourcedetection/openshift:
+      detectors:
+        - openshift
+
+
+  exporters:
+
+    debug:
+      verbosity: detailed
+    otlp/microshift-metrics:
+      endpoint: http://192.168.31.109:4317
+      tls:
+        insecure: true
+
+  extensions:
+    health_check:
+      check_collector_pipeline:
+        enabled: true
+        exporter_failure_threshold: 5
+        interval: 5m
+      endpoint: null
+
+
+    memory_ballast:
+      size_in_percentage: 20
+        
+
+    k8s_observer:
+      auth_type: serviceAccount
+      node: ${K8S_NODE_IP}
+      observe_nodes: true
+      observe_pods: true
+
+
+  service:
+
+    extensions:
+      - memory_ballast
+      - k8s_observer
+            
+
+    telemetry:
+      logs:
+        level: debug
+      metrics:
+        address: :8888
+
+    pipelines:
+
+      metrics/kubelet-node:
+        exporters:
+          - debug
+          - otlp/microshift-metrics
+        processors:
+          - resource/clusterinfo
+          - resource/nodename-insert
+          - resource/nodestats
+          - resourcedetection/openshift
+        receivers:
+          - kubeletstats/node
+
+      metrics/kubelet-pod:
+        exporters:
+          - debug
+          - otlp/microshift-metrics
+        processors:
+          - resource/clusterinfo
+          - resource/podstats
+          - resource/nodename-insert
+          - resourcedetection/openshift
+        receivers:
+          - kubeletstats/pod
+
+      metrics/powerlevel-podstats:
+        exporters:
+          - debug
+          - otlp/microshift-metrics
+        processors:
+          - resource/clusterinfo
+          - resource/pod-powerlevel-stats
+          - resource/nodename-insert
+          - resourcedetection/openshift
+          - filter/pod-powerlevel
+        receivers:
+          - prometheus/kepler-powerlevel
+
+      metrics/powerlevel-nodestats:
+        exporters:
+          - debug
+        processors:
+          - resource/clusterinfo
+          - resource/node-powerlevel-stats
+          - resource/nodename-insert
+          - resourcedetection/openshift
+          - filter/node-powerlevel
+        receivers:
+          - prometheus/kepler-powerlevel

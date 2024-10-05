@@ -1,0 +1,133 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: apmlogs
+  namespace: observability-kafka
+  finalizers:
+    - strimzi.io/topic-operator
+  labels:
+    strimzi.io/cluster: telemetry
+spec:
+  config:
+    retention.ms: 1800000
+    segment.bytes: 104857600
+  replicas: 4
+
+--- 
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: apmmetrics
+  namespace: observability-kafka
+  finalizers:
+    - strimzi.io/topic-operator
+  labels:
+    strimzi.io/cluster: telemetry
+spec:
+  config:
+    retention.ms: 1800000
+    segment.bytes: 104857600
+  replicas: 4
+
+---
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: apmtraces
+  namespace: observability-kafka
+  finalizers:
+    - strimzi.io/topic-operator
+  labels:
+    strimzi.io/cluster: telemetry
+spec:
+  config:
+    retention.ms: 1800000
+    segment.bytes: 104857600
+  replicas: 4
+
+---
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: containerpowerlevel
+  namespace: observability-kafka
+  finalizers:
+    - strimzi.io/topic-operator
+  labels:
+    strimzi.io/cluster: telemetry
+spec:
+  config:
+    retention.ms: 1800000
+    segment.bytes: 104857600
+  replicas: 4
+
+--- 
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: nodepowerlevel
+  namespace: observability-kafka
+  finalizers:
+    - strimzi.io/topic-operator
+  labels:
+    strimzi.io/cluster: telemetry
+spec:
+  config:
+    retention.ms: 1800000
+    segment.bytes: 104857600
+  replicas: 4
+
+---
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: k8sevents
+  namespace: observability-kafka
+  finalizers:
+    - strimzi.io/topic-operator
+  labels:
+    strimzi.io/cluster: telemetry
+spec:
+  config:
+    retention.ms: 1800000
+    segment.bytes: 104857600
+  replicas: 4
+
+---
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: nodestats
+  namespace: observability-kafka
+  finalizers:
+    - strimzi.io/topic-operator
+  labels:
+    strimzi.io/cluster: telemetry
+spec:
+  config:
+    retention.ms: 1800000
+    segment.bytes: 104857600
+  replicas: 4
+
+--- 
+
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: podstats
+  namespace: observability-kafka
+  finalizers:
+    - strimzi.io/topic-operator
+  labels:
+    strimzi.io/cluster: telemetry
+spec:
+  config:
+    retention.ms: 1800000
+    segment.bytes: 104857600
+  replicas: 4

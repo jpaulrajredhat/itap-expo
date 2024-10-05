@@ -61,7 +61,6 @@ spec:
           volumeMounts:
             - name: otc-internal
               mountPath: /conf
-          terminationMessagePolicy: File
           image: 'ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.107.0'
           args:
             - '--config=/conf/collector.yaml'

@@ -1,0 +1,29 @@
+{{- if .Values.namespace.name }}
+
+{{- range .Values.service }}
+{{- if .enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name | default (printf "%s-%s" (include "otel-collector.fullname" $) (.serviceType | lower)) }}
+  namespace: {{ $.Values.namespace.name }}
+  labels:
+    {{- include "otel-collector.labels" $ | nindent 4 }}
+spec:
+  type: {{ .serviceType }}
+  ports:
+    {{- range $.Values.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      protocol: {{ .protocol }}
+      targetPort: {{ .targetPort }}
+    {{- end }}
+  selector:
+    {{- include "otel-collector.selectorLabels" $ | nindent 4 }}
+
+---
+
+{{- end }}
+{{- end }}
+
+{{- end }}

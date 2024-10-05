@@ -1,0 +1,26 @@
+{{- if .Values.namespace.name }}
+
+{{- if and .Values.rbac.enabled .Values.rbac.roleBinding.create -}}
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ default (printf "%s-clusterrolebinding" .Release.Name) .Values.rbac.clusterRoleBinding.name }}
+  labels:
+    {{- include "otel-collector.labels" . | nindent 4 }}
+  {{- with .Values.rbac.clusterRoleBinding.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-clusterrole
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-serviceaccount
+  namespace: {{ $.Values.namespace.name }}
+
+{{- end }}
+
+{{- end }}

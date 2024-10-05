@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: otel-collector
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: observability-datamesh
+    server: 'https://kubernetes.default.svc'
+  project: zaga-observ
+  source: 'https://github.com/ZagaUS/zaga-observ-gitops.git'
+    helm:
+      valueFiles:
+        - values.yaml
+    path: datamesh-components/minio/helm
+    repoURL: 'https://github.com/ZagaUS/zaga-observ-gitops.git'
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      selfHeal: true
