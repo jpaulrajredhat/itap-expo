@@ -127,9 +127,10 @@
     debug:
       verbosity: detailed
     otlp/microshift-metrics:
-      endpoint: http://192.168.31.109:4317
+      endpoint: 192.168.31.120:4317
       tls:
         insecure: true
+        insecure_skip_verify: true
 
   extensions:
     health_check:
