@@ -1,0 +1,18 @@
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kepler-exporter-crb
+  labels:
+    app.kubernetes.io/component: exporter
+    app.kubernetes.io/name: kepler-exporter
+    app.kubernetes.io/part-of: kepler
+    sustainable-computing.io/app: kepler
+roleRef:
+  kind: ClusterRole
+  name: kepler-exporter-cr
+  apiGroup: "rbac.authorization.k8s.io"
+subjects:
+- kind: ServiceAccount
+  name: kepler-exporter-sa
+  namespace: kepler

@@ -1,0 +1,25 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: kepler-exporter-svc
+  namespace: kepler
+  labels:
+    app.kubernetes.io/component: exporter
+    app.kubernetes.io/name: kepler-exporter
+    app.kubernetes.io/part-of: kepler
+    sustainable-computing.io/app: kepler
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9102
+      targetPort: 9102
+  internalTrafficPolicy: Cluster
+  type: LoadBalancer
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  selector:
+    app.kubernetes.io/component: exporter
+    app.kubernetes.io/name: kepler-exporter
+    app.kubernetes.io/part-of: kepler
+    sustainable-computing.io/app: kepler

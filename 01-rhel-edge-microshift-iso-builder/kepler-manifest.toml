@@ -1,0 +1,3 @@
+[[containers]]
+source = "quay.io/sustainable_computing_io/kepler:latest"
+

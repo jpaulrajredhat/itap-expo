@@ -13,7 +13,7 @@ spec:
       valueFiles:
         - values.yaml
     path: datamesh-components/minio/helm
-    repoURL: 'https://github.com/ZagaUS/.git'
+    repoURL: 'https://github.com/ZagaUS/ita-expo.git'
     targetRevision: HEAD
   syncPolicy:
     automated:

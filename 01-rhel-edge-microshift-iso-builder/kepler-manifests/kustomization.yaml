@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ./01-kepler-namespace.yaml
+- ./02-kepler-exporter-security_context_constraints.yaml
+- ./03-kepler-exporter-cluster_role.yaml
+- ./04-kepler-exporter-service_account.yaml
+- ./05-kepler-exporter-cluster_role_binding.yaml
+- ./06-kepler-exporter-configmap.yaml
+- ./07-kepler-exporter-ds.yaml
+- ./08-kepler-exporter-service.yaml
+
+images:
+- name: quay.io/sustainable_computing_io/kepler:latest
+  newName: quay.io/sustainable_computing_io/kepler
+  newTag: "latest"

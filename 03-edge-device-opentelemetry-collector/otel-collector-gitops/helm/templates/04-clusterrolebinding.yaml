@@ -1,6 +1,6 @@
 {{- if .Values.namespace.name }}
 
-{{- if and .Values.rbac.enabled .Values.rbac.roleBinding.create -}}
+{{- if and .Values.rbac.enabled .Values.rbac.clusterRoleBinding.create -}}
 
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

@@ -1,0 +1,163 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: kepler-exporter-ds
+  namespace: kepler
+spec:
+
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: exporter
+      app.kubernetes.io/name: kepler-exporter
+      app.kubernetes.io/part-of: kepler
+      sustainable-computing.io/app: kepler
+
+
+  template:
+    metadata:
+      name: kepler-exporter-ds
+      namespace: kepler
+      labels:
+        app.kubernetes.io/component: exporter
+        app.kubernetes.io/name: kepler-exporter
+        app.kubernetes.io/part-of: kepler
+        sustainable-computing.io/app: kepler
+
+
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 0
+
+
+    spec:
+
+      nodeSelector:
+        kubernetes.io/os: linux
+
+      serviceAccountName: kepler-exporter-sa
+
+      hostPID: true
+
+      securityContext: {}
+
+
+      serviceAccount: kepler-exporter-sa
+
+
+      volumes:
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+            type: Directory
+        - name: tracing
+          hostPath:
+            path: /sys
+            type: Directory
+        - name: proc
+          hostPath:
+            path: /proc
+            type: Directory
+        - name: kernel-src
+          hostPath:
+            path: /usr/src/kernels
+            type: Directory
+        - name: kernel-debug
+          hostPath:
+            path: /sys/kernel/debug
+            type: Directory
+        - name: cfm
+          configMap:
+            name: kepler-exporter-cm
+            defaultMode: 420
+
+      dnsPolicy: ClusterFirstWithHostNet
+
+      tolerations:
+        - operator: Exists
+
+      containers:
+
+        - resources: {}
+
+
+          name: kepler-exporter
+
+
+          command:
+            - /usr/bin/kepler
+            - '-address'
+            - '0.0.0.0:9102'
+            - '-enable-cgroup-id=true'
+            - '-enable-gpu=$(ENABLE_GPU)'
+            - '-v=$(KEPLER_LOG_LEVEL)'
+
+
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 9102
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+            periodSeconds: 60
+            successThreshold: 1
+            failureThreshold: 5
+
+
+          env:
+            - name: NODE_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            - name: KEPLER_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: kepler-exporter-cm
+                  key: KEPLER_LOG_LEVEL
+            - name: ENABLE_GPU
+              valueFrom:
+                configMapKeyRef:
+                  name: kepler-exporter-cm
+                  key: ENABLE_GPU
+
+
+          securityContext:
+            privileged: true
+
+
+          ports:
+            - name: http
+              containerPort: 9102
+              protocol: TCP
+
+
+          imagePullPolicy: IfNotPresent
+
+
+          volumeMounts:
+            - name: lib-modules
+              readOnly: true
+              mountPath: /lib/modules
+            - name: tracing
+              readOnly: true
+              mountPath: /sys
+            - name: kernel-src
+              readOnly: true
+              mountPath: /usr/src/kernels
+            - name: kernel-debug
+              mountPath: /sys/kernel/debug
+            - name: proc
+              mountPath: /proc
+            - name: cfm
+              mountPath: /etc/kepler/kepler.config
+
+          image: 'quay.io/sustainable_computing_io/kepler:latest'

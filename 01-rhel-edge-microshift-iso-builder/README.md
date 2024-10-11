@@ -340,6 +340,8 @@ EOF
 mkksiso kickstart.ks <INSTALLER_IMAGE_ID>-installer.iso microshift-rpmostree-installer.iso
 ```
 
+oc kustomize ./kepler-manifests | grep "image:" | grep -oE '[^ ]+$' | while read line; do echo -e "[[containers]]\nsource = \"${line}\"\n"; done >>kepler-manifest.toml
+
 <!-- 
 !!!!!!! Tested installing packages in local !!!!!!!
 

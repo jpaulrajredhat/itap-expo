@@ -1,0 +1,102 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: opentelemetry-operator
+  name: microshift-telemetry
+  namespace: observability-otel
+spec:
+  args:
+    feature-gates: -component.UseLocalHostAsDefaultHost
+  config:
+    exporters:
+      debug:
+        verbosity: detailed
+      kafka/nodepowerstats:
+        brokers:
+        - telemetry-kafka-bootstrap.observability-kafka.svc.cluster.local:9092
+        encoding: otlp_json
+        protocol_version: 3.7.0
+        topic: nodepowerlevel
+      kafka/nodestats:
+        brokers:
+        - telemetry-kafka-bootstrap.observability-kafka.svc.cluster.local:9092
+        encoding: otlp_json
+        protocol_version: 3.7.0
+        topic: nodestats
+      kafka/podpowerstats:
+        brokers:
+        - telemetry-kafka-bootstrap.observability-kafka.svc.cluster.local:9092
+        encoding: otlp_json
+        protocol_version: 3.7.0
+        topic: containerpowerlevel
+      kafka/podstats:
+        brokers:
+        - telemetry-kafka-bootstrap.observability-kafka.svc.cluster.local:9092
+        encoding: otlp_json
+        protocol_version: 3.7.0
+        topic: podstats
+    processors:
+      batch: {}
+      routing/metricsstats:
+        attribute_source: resource
+        from_attribute: metrics.stats
+        table:
+        - exporters:
+            - kafka/nodestats
+          value: node
+        - exporters:
+          - kafka/podstats
+          value: pod
+        - exporters:
+          - kafka/podpowerstats
+          value: pod-powerlevel
+        - exporters:
+          - kafka/nodepowerstats
+          value: node-powerlevel
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+    service:
+      pipelines:
+        metrics/debug:
+          exporters:
+          - debug
+          receivers:
+          - otlp
+        metrics/nodepowerstats:
+          exporters:
+          - debug
+          processors:
+          - routing/metricsstats
+          receivers:
+          - otlp
+        metrics/nodestats:
+          exporters:
+          - debug
+          processors:
+          - routing/metricsstats
+          receivers:
+          - otlp
+        metrics/podpowerstats:
+          exporters:
+          - debug
+          processors:
+          - routing/metricsstats
+          receivers:
+          - otlp
+        metrics/podstats:
+          exporters:
+          - debug
+          processors:
+          - routing/metricsstats
+          receivers:
+          - otlp
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.107.0
+  managementState: managed
+  mode: deployment
+  replicas: 1

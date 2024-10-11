@@ -1,0 +1,36 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: microshift-telemetry-collector-lb
+  namespace: observability-otel
+  labels:
+    app.kubernetes.io/component: opentelemetry-collector
+    app.kubernetes.io/instance: observability-otel.microshift-telemetry
+    app.kubernetes.io/managed-by: opentelemetry-operator
+    app.kubernetes.io/name: microshift-telemetry-collector
+    app.kubernetes.io/part-of: opentelemetry
+    app.kubernetes.io/version: 0.107.0
+    operator.opentelemetry.io/collector-service-type: base
+spec:
+  ipFamilies:
+    - IPv4
+  ports:
+    - name: otlp-grpc
+      protocol: TCP
+      appProtocol: grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      protocol: TCP
+      appProtocol: http
+      port: 4318
+      targetPort: 4318
+  internalTrafficPolicy: Cluster
+  type: LoadBalancer
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  selector:
+    app.kubernetes.io/component: opentelemetry-collector
+    app.kubernetes.io/instance: observability-otel.microshift-telemetry
+    app.kubernetes.io/managed-by: opentelemetry-operator
+    app.kubernetes.io/part-of: opentelemetry
