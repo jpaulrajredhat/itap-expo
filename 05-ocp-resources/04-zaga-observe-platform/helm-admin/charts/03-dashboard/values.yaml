@@ -1,0 +1,83 @@
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: zagaos
+  name: admin-dashboard-observai
+  pullPolicy: IfNotPresent
+  tag: 7dd059a
+  strategy: ""
+languageFramework: react
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+
+ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    subdomainName: admin-dashboard
+    routePolicy:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+service:
+  - enabled: true
+    serviceType: ClusterIP
+    name: admin-dashboard
+  - enabled: false
+    serviceType: LoadBalancer
+    name: admin-dashboard-lb
+
+routes:
+  enabled: true
+  tls: true
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  tls: false
+  annotations: {}
+    # cert-manager.io/cluster-issuer: zagaadmin-cluster-issuer
+
+secretsEnv: {}
+
+configmapEnv: {}
+
+probes:
+  readiness:
+  liveness:
+
+volumes: {}
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

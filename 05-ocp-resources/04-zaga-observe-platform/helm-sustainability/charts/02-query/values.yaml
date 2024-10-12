@@ -1,0 +1,105 @@
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: zagaos
+  name: sustainability-query-pyiceberg
+  pullPolicy: IfNotPresent
+  tag: v18
+  strategy: ""
+
+languageFramework: python
+
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+ports:
+  - name: http
+    subdomainName: sustainability-query
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+    routePolicy:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+
+service:
+  - enabled: true
+    serviceType: ClusterIP
+    name: sustainability-query
+
+  - enabled: false
+    serviceType: LoadBalancer
+    name: sustainability-query-lb
+
+
+routes:
+  enabled: true
+  tls: true
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  tls: false
+  annotations: {}
+
+
+secretsEnv: {}
+
+
+configmapEnv:
+  - name: ""
+    data:
+      SUSTAIN_TABLE_NAME: iceberg.sustainability_pod.pod
+      NODE_TABLE_NAME: iceberg.sustainability_node.node
+      TRINO_HOST: admin@trino-coordinator.observability-datamesh.svc.cluster.local:8080
+
+
+probes:
+  readiness:
+  liveness:
+
+volumes: {}
+
+
+
+resources: 
+  limits:
+    cpu: 450m
+    memory: 3Gi
+  requests:
+    cpu: 400m
+    memory: 2Gi
+
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

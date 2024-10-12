@@ -1,0 +1,99 @@
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: zagaos
+  name: admin-backend-pyiceberg
+  pullPolicy: IfNotPresent
+  tag: v20
+  strategy: ""
+
+languageFramework: python
+
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+
+ports:
+  - name: http
+    subdomainName: admin-backend
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+    routePolicy:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+service:
+  - enabled: true
+    serviceType: ClusterIP
+    name: admin-backend
+  - enabled: false
+    serviceType: LoadBalancer
+    name: admin-backend-lb
+
+routes:
+  enabled: true
+  tls: true
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  tls: false
+  annotations: {}
+
+secretsEnv: {}
+
+configmapEnv:
+  - name: ""
+    mount: ""
+    mountPath: ""
+    data:
+      POSTGRES_USER: usermanager
+      POSTGRES_PASSWORD: usermanager123$
+      POSTGRES_HOST: admin-db.observability-zaga.svc.cluster.local
+      POSTGRES_PORT: '5432'
+      POSTGRES_DB: userdb
+
+env:
+  - name: NAMESPACE
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.namespace  
+
+probes:
+  readiness:
+  liveness:
+
+volumes: {}
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

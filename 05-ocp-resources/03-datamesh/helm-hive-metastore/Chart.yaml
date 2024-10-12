@@ -1,0 +1,20 @@
+apiVersion: v2
+name: hive
+description: A Helm chart for Kubernetes
+
+version: 1.0.0
+
+dependencies:
+  - name: postgresql
+    version: "1.0.0"
+    repository: "file://charts/hive-postgresql"
+    condition: subcharts.postgresql
+    tags:
+      - postgresql
+
+  - name: metastore
+    version: "1.0.0"
+    repository: "file://charts/hive-metastore"
+    condition: subcharts.metastore
+    tags:
+      - metastore

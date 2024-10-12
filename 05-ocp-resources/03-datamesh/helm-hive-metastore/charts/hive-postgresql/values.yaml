@@ -1,0 +1,85 @@
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: osclimate
+  name: postgresql-13
+  pullPolicy: IfNotPresent
+  tag: 1-101
+  strategy: {}
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+args: {}
+
+ports:
+  - name: jdbc-tcp
+    port: 5432
+    protocol: TCP
+    targetPort: 5432
+
+
+service:
+  - enabled: true
+    serviceType: ClusterIP
+    name: hive-metastore-db
+  - enabled: false
+    serviceType: LoadBalancer
+    name: hive-metastore-db-lb
+
+secretsEnv: []
+
+env: []
+
+configmapEnv:
+  - name: ""
+    data:
+      POSTGRESQL_ADMIN_PASSWORD: admin123$
+      POSTGRESQL_DATABASE: hivemetadb
+      POSTGRESQL_PASSWORD: hivemeta123$
+      POSTGRESQL_USER: hive
+
+volumes: 
+  - type: PersistentVolumeClaim
+    apiVersion: v1
+    accessModes: ReadWriteOnce
+    volumeName: ""
+    mountPath: /storage
+    storageSize: "4Gi"
+    
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+resources: {}
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

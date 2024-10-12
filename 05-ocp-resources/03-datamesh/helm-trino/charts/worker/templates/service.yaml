@@ -1,0 +1,24 @@
+{{- range .Values.service }}
+{{- if .enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name | default (printf "%s-%s" (include "coordinator.fullname" $) (.serviceType | lower)) }}
+  labels:
+    {{- include "worker.labels" $ | nindent 4 }}
+spec:
+  type: {{ .serviceType }}
+  ports:
+    {{- range $.Values.ports }}
+    - name: {{ .name }}
+      port: {{ .port }}
+      protocol: {{ .protocol }}
+      targetPort: {{ .targetPort }}
+    {{- end }}
+  selector:
+    {{- include "worker.selectorLabels" $ | nindent 4 }}
+
+---
+
+{{- end }}
+{{- end }}

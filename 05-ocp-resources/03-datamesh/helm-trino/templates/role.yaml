@@ -1,0 +1,23 @@
+{{- if and .Values.rbac.enabled .Values.rbac.role.create -}}
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-role
+  labels:
+    {{- include "trino.labels" . | nindent 4 }}
+  {{- with .Values.rbac.role.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - {{ .Release.Name }}-scc
+  resources:
+  - SecurityContextConstraints
+  verbs:
+  - use
+
+{{- end }}

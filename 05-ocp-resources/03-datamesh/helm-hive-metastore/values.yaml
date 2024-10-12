@@ -1,0 +1,183 @@
+nameOverride: ""
+
+subcharts:
+  postgresql: true
+  metastore: true
+
+############################
+
+postgresql: 
+
+  replicaCount: 1
+
+  containerName: ""
+
+  image:
+    registry: quay.io
+    username: osclimate
+    name: postgresql-13
+    pullPolicy: IfNotPresent
+    tag: 1-101
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext: {}
+
+  args: {}
+
+  ports:
+    - name: jdbc-tcp
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+
+
+  service:
+    - enabled: true
+      serviceType: ClusterIP
+      name: hive-metastore-db
+    - enabled: false
+      serviceType: LoadBalancer
+      name: hive-metastore-db-lb
+
+  secretsEnv: []
+
+  env: []
+
+  configmapEnv:
+    - name: ""
+      data:
+        POSTGRESQL_ADMIN_PASSWORD: admin123$
+        POSTGRESQL_DATABASE: hivemetadb
+        POSTGRESQL_PASSWORD: hivemeta123$
+        POSTGRESQL_USER: hive
+
+  volumes: 
+    - type: PersistentVolumeClaim
+      apiVersion: v1
+      accessModes: ReadWriteOnce
+      volumeName: hive-metastore-postgresql
+      mountPath: /storage
+      storageSize: "4Gi"
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
+  resources: {}
+
+  serviceAccount:
+    create: false
+    annotations: {}
+    name: ""
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+####################################
+
+metastore:
+
+  replicaCount: 1
+
+  containerName: ""
+
+  image:
+    registry: quay.io
+    username: osclimate
+    name: hive-metastore
+    pullPolicy: IfNotPresent
+    tag: latest
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  serviceAccount:
+    create: false
+    annotations: {}
+    name: ""
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext: {}
+
+  args: {}
+
+  ports:
+    - name: thrift-tcp
+      port: 9083
+      protocol: TCP
+      targetPort: 9083
+
+  service:
+    - enabled: true
+      serviceType: ClusterIP
+      name: hive-metastore
+    - enabled: true
+      serviceType: LoadBalancer
+      name: hive-metastore-lb
+
+
+  secretsEnv:
+    - name: ""
+      data:
+        AWS_ACCESS_KEY_ID: minioAdmin
+        AWS_SECRET_ACCESS_KEY: minio1234
+        DATABASE_DB: hivemetadb
+        DATABASE_USER: hive
+        DATABASE_PASSWORD: hivemeta123$
+
+  # configmapEnv: {}
+
+  env:
+    - name: NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+    - name: S3_ENDPOINT_URL
+      value: 'http://minio.$(NAMESPACE).svc.cluster.local:9000'
+    - name: S3_PREFIX
+      value: data
+    - name: S3_BUCKET
+      value: zaga
+    - name: DATABASE_HOST
+      value: hive-metastore-db
+    - name: DATABASE_PORT
+      value: '5432'
+
+
+  volumes: 
+    - type: EmptyDir
+      volumeName: hadoop-config
+      mountPath: /opt/hadoop/etc/hadoop
+    - type: EmptyDir
+      volumeName: hive-config
+      mountPath: /opt/hive-metastore/conf
+
+  resources: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}

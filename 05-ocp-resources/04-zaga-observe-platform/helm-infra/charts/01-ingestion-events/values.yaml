@@ -1,0 +1,81 @@
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: zagaos
+  name: infra-ingestion-pyiceberg
+  pullPolicy: IfNotPresent
+  tag: 00cab88
+  strategy: ""
+languageFramework: python
+
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+securityContext: {}
+
+ports: {}
+
+service:
+  - enabled: false
+    serviceType: ClusterIP
+  - enabled: false
+    serviceType: LoadBalancer
+
+
+secretsEnv: {}
+
+configmapEnv:
+  - name: ""
+    mount: ""
+    mountPath: ""
+    filePath: false
+    data:
+      KAFKA_TOPIC: k8sevents
+      SSL: "False"
+      MINIO_BUCKET: observability-infra-events
+      TABLE_NAME: event
+      NAME_SPACE: infra_event
+      CONSUMER_GROUP_ID: event_ingestion
+      SCRIPT_TO_RUN: event
+      BUCKET_NAME: s3a://observability-infra-events/events
+      KAFKA_BOOTSTRAP_SERVER: 'telemetry-kafka-bootstrap.observability-kafka.svc.cluster.local:9092'
+      URI: 'thrift://hive-metastore.observability-datamesh.svc.cluster.local:9083'
+      S3_ENDPOINT: 'http://minio.observability-datamesh.svc.cluster.local:9000'
+      ACCESS_KEY: minioAdmin
+      SECRET_KEY: minio1234
+
+probes:
+  readiness:
+
+  liveness:
+
+
+volumes: {}
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

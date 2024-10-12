@@ -1,0 +1,91 @@
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: zagaos
+  name: observe-infra-query-trino
+  pullPolicy: IfNotPresent
+  tag: v24
+  strategy: ""
+languageFramework: python
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+
+ports:
+  - name: https
+    subdomainName: infra-query
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+    routePolicy:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+service:
+  - enabled: true
+    serviceType: ClusterIP
+    name: infra-query
+  - enabled: false
+    serviceType: LoadBalancer
+    name: infra-query-lb
+
+routes:
+  enabled: true
+  tls: true
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  tls: false
+  annotations: {}
+
+secretsEnv: {}
+
+configmapEnv:
+  - name: ""
+    mount: ""
+    mountPath: ""
+    data:
+      NODE_TABLE_NAME: iceberg.infra_node.node
+      POD_TABLE_NAME: iceberg.infra_pod.pod
+      EVENT_TABLE_NAME: iceberg.infra_event.event
+      TRINO_HOST: admin@trino-coordinator.observability-datamesh.svc.cluster.local:8080
+
+
+probes:
+  readiness:
+  liveness:
+
+volumes: {}
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -1,0 +1,92 @@
+nameOverride: ""
+
+subcharts:
+  dashboard: true
+
+#############################################################
+
+dashboard:
+
+  replicaCount: 1
+
+  containerName: ""
+
+  image:
+    registry: quay.io
+    username: zagaos
+    name: quay.io/zagaos/zagaobserve-edge-dashboard 
+    pullPolicy: IfNotPresent
+    tag: latest
+    strategy: ""
+  languageFramework: react
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+
+  securityContext: {}
+
+  serviceAccount:
+    create: false
+    annotations: {}
+    name: ""
+
+
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+      subdomainName: edge-dashboard
+      routePolicy:
+        termination: edge
+        insecureEdgeTerminationPolicy: Redirect
+
+  service:
+    - enabled: true
+      serviceType: ClusterIP
+      name: edge-dashboard
+    - enabled: false
+      serviceType: LoadBalancer
+      name: edge-dashboard
+
+  routes:
+    enabled: true
+    tls: true
+    annotations: {}
+
+  ingress:
+    enabled: false
+    className: ""
+    tls: false
+    annotations: {}
+      # cert-manager.io/cluster-issuer: zagaadmin-cluster-issuer
+
+  secretsEnv: {}
+
+  configmapEnv: {}
+
+  probes:
+    readiness:
+    liveness:
+
+  volumes: {}
+
+  resources: {}
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}

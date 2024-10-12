@@ -1,0 +1,96 @@
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: zagaos
+  name: sustainability-dashboard-pyiceberg
+  pullPolicy: IfNotPresent
+  tag: "v7"
+  strategy: ""
+languageFramework: python
+
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    subdomainName: sustainability-dashboard
+    routePolicy:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+service:
+  - enabled: true
+    serviceType: ClusterIP
+    name: sustainability-dashboard
+
+  - enabled: false
+    serviceType: LoadBalancer
+    name: sustainability-dashboard-lb
+
+routes:
+  enabled: true
+  tls: true
+  annotations: {}
+
+
+ingress:
+  enabled: false
+  className: ""
+  tls: false
+  annotations: {}
+    # cert-manager.io/cluster-issuer: zagaadmin-cluster-issuer
+
+
+
+secretsEnv: {}
+
+
+configmapEnv: {}
+
+probes:
+  readiness:
+  liveness:
+
+volumes: {}
+
+resources: 
+  limits:
+    cpu: 350m
+    memory: 3Gi
+  requests:
+    cpu: 300m
+    memory: 2Gi
+
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

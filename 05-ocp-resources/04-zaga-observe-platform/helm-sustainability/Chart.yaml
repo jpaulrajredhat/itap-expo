@@ -1,0 +1,34 @@
+apiVersion: v2
+name: sustainability
+description: A Helm chart for Kubernetes
+
+version: 1.0.0
+
+dependencies:
+  - name: dashboard
+    version: "1.0.0"
+    repository: "file://charts/03-dashboard"
+    condition: subcharts.dashboard
+    tags:
+      - dashboard
+
+  - name: query
+    version: "1.0.0"
+    repository: "file://charts/02-query"
+    condition: subcharts.query
+    tags:
+      - query
+
+  - name: ingestion-nodepowerlevel
+    version: "1.0.0"
+    repository: "file://charts/01-ingestion-nodepowerlevel"
+    condition: subcharts.ingestion-nodepowerlevel
+    tags:
+      - ingestion-nodepowerlevel
+
+  - name: ingestion-podpowerlevel
+    version: "1.0.0"
+    repository: "file://charts/01-ingestion-podpowerlevel"
+    condition: subcharts.ingestion-podpowerlevel
+    tags:
+      - ingestion-podpowerlevel

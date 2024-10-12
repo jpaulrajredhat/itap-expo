@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ./01-namespace.yaml
+- ./02-collector-clusterrole.yaml
+- ./03-collector-serviceaccount.yaml
+- ./04-collector-clusterrolebinding.yaml
+- ./05-collector-configmap-otelconfig.yaml
+- ./06-collector-deployment.yaml
+
+images:
+- name: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.107.0
+  newName: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib
+  newTag: "0.107.0"

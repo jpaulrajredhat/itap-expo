@@ -1,0 +1,130 @@
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: osclimate
+  name: minio
+  pullPolicy: IfNotPresent
+  tag: latest
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+secretsEnv:
+  - name: ""
+    # mount: ""
+    # mountPath: ""
+    data:
+      MINIO_ACCESS_KEY: minio
+      MINIO_ROOT_PASSWORD: minio1234
+      MINIO_ROOT_USER: minioAdmin
+      MINIO_SECRET_KEY: minio1234
+
+configmapEnv:
+  - name: ""
+    # mount: ""
+    # mountPath: ""
+    data:
+      MINIO_TRACE: "true"
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+
+volumes:
+  - type: PersistentVolumeClaim
+    apiVersion: v1
+    accessModes: ReadWriteOnce
+    volumeName: ""
+    mountPath: /storage
+    storageSize: "80Gi"
+  # - type: EmptyDir
+  #   volumeName: ""
+  #   mountPath: /empty-dir
+
+resources: {}
+  # limits:
+  #   cpu: 600m
+  #   memory: 1128Mi
+  # requests:
+  #   cpu: 600m
+  #   memory: 1128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+args:
+  - server
+  - /storage
+  - --console-address=:33933
+
+ports:
+  - name: api
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+    subdomainName: minio-api
+    routePolicy:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+  - name: web
+    port: 33933
+    protocol: TCP
+    targetPort: 33933
+    subdomainName: minio-web
+    # ingressRules:
+    #   - host: minio-web-tls.apps.zagaopenshift.zagaopensource.com
+    #     path: /
+    #     pathType: Prefix
+    routePolicy:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+service:
+  - enabled: true
+    serviceType: ClusterIP
+    name: minio
+  - enabled: true
+    serviceType: LoadBalancer
+    name: minio-lb
+
+routes:
+  enabled: true
+  tls: true
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  tls: false
+  annotations: {}
+    # cert-manager.io/cluster-issuer: zagaadmin-cluster-issuer

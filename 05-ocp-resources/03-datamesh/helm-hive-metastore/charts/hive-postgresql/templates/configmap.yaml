@@ -1,0 +1,24 @@
+{{- range .Values.configmapEnv }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ if .name }}{{ .name }}{{ else }}{{ include "postgresql.fullname" $ }}-configmap{{ end }}
+  labels:
+    helm.sh/chart: {{ $.Chart.Name }}-{{ $.Chart.Version }}
+    app.kubernetes.io/part-of: {{ include "postgresql.fullname" $ }}
+    app.kubernetes.io/managed-by: Helm
+data:
+{{- if kindIs "slice" .data }}
+{{- range .data }}
+  {{- if and (hasKey . "name") (hasKey . "path") }}
+  {{ .name }}: |-
+{{- $.Files.Get .path | nindent 4 | trimSuffix "\n" }}
+  {{- end }}
+{{- end }}
+{{- else if kindIs "map" .data }}
+{{- range $key, $value := .data }}
+  {{ $key }}: "{{ $value }}"
+{{- end }}
+{{- end }}
+---
+{{- end }}
