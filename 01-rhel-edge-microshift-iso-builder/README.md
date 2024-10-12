@@ -340,7 +340,8 @@ EOF
 mkksiso kickstart.ks <INSTALLER_IMAGE_ID>-installer.iso microshift-rpmostree-installer.iso
 ```
 
-25. To set static IP after OS is installed, use following commands.
+25. In kickstart file network settings is set to dhcp. Plugin the ethernet cable and check the IP address using CLI.
+To set static IP after OS is installed, use following commands.
 
 ```shell
 nmcli conn show
