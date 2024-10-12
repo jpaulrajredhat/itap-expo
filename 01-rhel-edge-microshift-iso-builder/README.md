@@ -340,7 +340,18 @@ EOF
 mkksiso kickstart.ks <INSTALLER_IMAGE_ID>-installer.iso microshift-rpmostree-installer.iso
 ```
 
-oc kustomize ./kepler-manifests | grep "image:" | grep -oE '[^ ]+$' | while read line; do echo -e "[[containers]]\nsource = \"${line}\"\n"; done >>kepler-manifest.toml
+25. To set static IP after OS is installed, use following commands.
+
+```shell
+nmcli conn show
+```
+
+```shell
+nmcli conn mod <con-name> ipv4.method manual ipv4.add (static-IPaddress)/24 ipv4.dns 8.8.8.8,(additional-dns-if-required) ipv4.gateway (gateway-address)
+```
+
+
+<!-- oc kustomize ./kepler-manifests | grep "image:" | grep -oE '[^ ]+$' | while read line; do echo -e "[[containers]]\nsource = \"${line}\"\n"; done >>kepler-manifest.toml -->
 
 <!-- 
 !!!!!!! Tested installing packages in local !!!!!!!
