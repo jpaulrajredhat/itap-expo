@@ -1,0 +1,92 @@
+
+replicaCount: 1
+
+containerName: ""
+
+image:
+  registry: quay.io
+  username: zagaos
+  name: order-vendor-sample
+  pullPolicy: IfNotPresent
+  tag: vendor-test-1
+  strategy: ""
+languageFramework: spring-boot
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations:
+  instrumentation.opentelemetry.io/inject-java: 'true'
+
+podSecurityContext: {}
+
+securityContext: {}
+
+serviceAccount:
+  create: false
+  annotations: {}
+  name: ""
+
+
+ports:
+  - name: http
+    subdomainName: vendor-srv
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+    routePolicy:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+
+service:
+  - enabled: true
+    serviceType: ClusterIP
+    name: vendor-srv
+  - enabled: false
+    serviceType: LoadBalancer
+    name: vendor-srv-lb
+
+routes:
+  enabled: true
+  tls: false
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  tls: false
+  annotations: {}
+
+secretsEnv: {}
+
+configmapEnv:
+  - name: ""
+    mount: ""
+    mountPath: ""
+    data:
+      POSTGRES_PASSWORD: testcases123
+      POSTGRES_URL: jdbc:postgresql://postgresql-testcase-db.observability-testcases.svc.cluster.local:5432/testcasesdb
+      POSTGRES_USER: testcasesuser
+      APP_APIURL: http://order-srv.observability-testcases.svc.cluster.local:5089/orders/getOrders
+
+probes:
+  readiness:
+  liveness:
+
+volumes: {}
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

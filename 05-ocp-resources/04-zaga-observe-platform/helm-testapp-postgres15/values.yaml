@@ -1,0 +1,94 @@
+nameOverride: ""
+
+subcharts:
+  postgresql: true
+
+#############################################################
+
+postgresql:
+
+  replicaCount: 1
+
+  containerName: ""
+  
+  image:
+    registry: quay.io
+    username: zagaos
+    name: zaga-postgres15-rhel9
+    pullPolicy: IfNotPresent
+    tag: latest
+    
+  languageFramework: postgresql
+  
+
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+    # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+
+  args: {}
+
+  ports:
+    - name: jdbc-tcp
+      port: 5432
+      protocol: TCP
+      targetPort: 5432
+
+
+  service:
+    - enabled: true
+      serviceType: ClusterIP
+      name: postgresql-testcase-db
+    - enabled: false
+      serviceType: LoadBalancer
+      name: postgresql-testcase-db-lb
+
+
+  configmapEnv:
+    - name: ""
+      data:
+        DATABASES: testcasesdb
+        PASSWORDS: testcases123
+        USERS: testcasesuser
+
+  volumes: 
+    - type: PersistentVolumeClaim
+      apiVersion: v1
+      accessModes: ReadWriteOnce
+      volumeName: ""
+      mountPath: /postgres
+      storageSize: "4Gi"
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  resources: {}
+
+  serviceAccount:
+    create: false
+    annotations: {}
+    name: ""
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+#############################################################

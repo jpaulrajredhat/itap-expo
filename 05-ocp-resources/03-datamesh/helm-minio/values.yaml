@@ -55,7 +55,7 @@ volumes:
     accessModes: ReadWriteOnce
     volumeName: ""
     mountPath: /storage
-    storageSize: "80Gi"
+    storageSize: "120Gi"
   # - type: EmptyDir
   #   volumeName: ""
   #   mountPath: /empty-dir
